@@ -13,11 +13,17 @@ def send_email(to_email: str, subject: str, body: str):
     msg["From"] = settings.SMTP_USER
     msg["To"] = to_email
 
-    with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT) as server:
+    try:
 
-        server.login(
-            settings.SMTP_USER,
-            settings.SMTP_PASSWORD
-        )
+        with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT) as server:
+            server.set_debuglevel(1)
+            server.starttls()
+            server.login(
+                settings.SMTP_USER,
+                settings.SMTP_PASSWORD
+            )
 
-        server.send_message(msg)
+            server.send_message(msg)
+            print("Email sent successfully")
+    except Exception as e:
+        print(f"Email sending failed:  {str(e)}")

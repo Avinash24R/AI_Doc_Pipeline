@@ -1,6 +1,30 @@
-def generate_summary(text: str):
+import requests
 
-    if len(text) < 300:
-        return text
+OLLAMA_URL = "http://ollama:11434/api/generate"
+MODEL_NAME = "deepseek-r1:1.5b"
 
-    return text[:300]
+def generate_summary(text: str) -> str:
+    if not text:
+        return ""
+
+    prompt = f"""
+    Summarize the following document in 5-10 concise bullet points.
+
+    Document:
+    {text[:6000]}
+    """
+
+    response = requests.post(
+        OLLAMA_URL,
+        json={
+            "model": MODEL_NAME,
+            "prompt": prompt,
+            "stream": False
+        },
+        timeout=300
+    )
+
+    response.raise_for_status()
+
+    return response.json()["response"]
+

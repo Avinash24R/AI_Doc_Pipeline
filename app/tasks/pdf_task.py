@@ -9,7 +9,7 @@ from app.services.ai_service import generate_summary
 from app.tasks.notification_task import send_completion_email
 
 
-@celery.task(name="process_pdf")
+@celery.task(name="app.tasks.pdf_task.process_pdf")
 def process_pdf(document_id: int):
 
     db = SessionLocal()

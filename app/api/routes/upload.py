@@ -42,11 +42,11 @@ async def upload_pdf(
     db.add(document)
     db.commit()
     db.refresh(document)
-
+    print("Queueing Task")
     process_pdf.delay(# pyright: ignore[reportFunctionMemberAccess]
         document.id
         )
-
+    print("Task Queued")
     return {
         "message": "PDF uploaded successfully",
         "document_id": document.id,

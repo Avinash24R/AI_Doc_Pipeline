@@ -3,7 +3,7 @@ from app.core.celery_app import celery
 from app.services.email_service import send_email
 
 
-@celery.task(bind=True, max_retries=3)
+@celery.task(bind=True, max_retries=3, name="app.tasks.notification_task.send_completion_email")
 def send_completion_email(
     self,
     user_email: str,

@@ -5,6 +5,7 @@ services:
     build: .
     container_name: fastapi_app
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    restart: always
     ports:
       - "8000:8000"
     volumes:
@@ -17,7 +18,7 @@ services:
   worker:
     build: .
     container_name: celery_worker
-    command: celery -A app.core.celery_app.celery worker --loglevel=info
+    command: ["celery","-A","app.core.celery_app.celery","worker","-Q","pdf_queue,notification_queue","--concurrency=5","--loglevel=info"]
     volumes:
       - .:/app
     depends_on:
@@ -40,3 +41,28 @@ services:
       - POSTGRES_DB=document_pipeline
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+  ollama:
+    image: ollama/ollama
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+  ollama-init:
+    image: curlimages/curl
+    depends_on:
+      - ollama
+    entrypoint: >
+      sh -c "
+      sleep 30 &&
+      curl http://ollama:11434/api/pull -d '{\"name\":\"deepseek-r1:1.5b\"}'
+      "
+  
+volumes:
+  ollama_data:

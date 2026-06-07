@@ -1,11 +1,13 @@
 import os
 
-from fastapi import APIRouter, UploadFile, File, Depends, Form
+from fastapi import APIRouter, UploadFile, File, Depends, Form , HTTPException
 
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
 from app.db.models import Document
+
+from app.services.s3_service import upload_file_s3
 
 from app.core.config import settings
 
@@ -22,20 +24,17 @@ async def upload_pdf(
     db: Session = Depends(get_db)
 ):
     if not file.filename:
-        raise ValueError("Invalid filename")
+        raise HTTPException(
+            status_code=400,
+            detail= "Invalid filename"
+        )
 
-    file_path = os.path.join(
-        settings.UPLOAD_DIR,
-        file.filename
-    )
-
-    with open(file_path, "wb") as f:
-        content = await file.read()
-        f.write(content)
-
+    s3 = upload_file_s3(file)
     document = Document(
         filename=file.filename,
-        filepath=file_path,
+        s3_key=s3["s3_key"],
+        s3_url=s3["s3_url"],
+        status="PENDING",
         user_email=email
     )
 

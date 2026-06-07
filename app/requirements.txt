@@ -3,6 +3,7 @@ uvicorn
 celery
 redis
 requests
+boto3
 sqlalchemy
 psycopg2-binary
 python-multipart

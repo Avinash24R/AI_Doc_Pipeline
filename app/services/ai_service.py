@@ -1,7 +1,7 @@
 import requests
 
 OLLAMA_URL = "http://ollama:11434/api/generate"
-MODEL_NAME = "deepseek-r1:1.5b"
+MODEL_NAME = "phi3:mini"
 
 def generate_summary(text: str) -> str:
     if not text:

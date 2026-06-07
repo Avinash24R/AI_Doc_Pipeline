@@ -19,7 +19,12 @@ class Document(Base):
         nullable=False
     )
 
-    filepath: Mapped[str] = mapped_column(
+    s3_key: Mapped[str] = mapped_column(
+        String,
+        nullable=False
+    )
+
+    s3_url: Mapped[str] = mapped_column(
         String,
         nullable=False
     )

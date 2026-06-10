@@ -1,5 +1,6 @@
 import os
-
+import uuid
+import aiofiles
 from fastapi import APIRouter, UploadFile, File, Depends, Form
 
 from sqlalchemy.orm import Session
@@ -11,6 +12,7 @@ from app.core.config import settings
 
 from app.tasks.pdf_task import process_pdf
 
+from datetime import datetime , timezone
 
 router = APIRouter()
 
@@ -23,20 +25,20 @@ async def upload_pdf(
 ):
     if not file.filename:
         raise ValueError("Invalid filename")
-
+    filename = f"{uuid.uuid4()}_{file.filename}"
     file_path = os.path.join(
         settings.UPLOAD_DIR,
-        file.filename
+        filename
     )
 
-    with open(file_path, "wb") as f:
-        content = await file.read()
-        f.write(content)
+    async with aiofiles.open(file_path, "wb") as f:
+        await f.write(await file.read())
 
     document = Document(
         filename=file.filename,
         filepath=file_path,
-        user_email=email
+        user_email=email,
+        queued_at=datetime.now(timezone.utc)
     )
 
     db.add(document)

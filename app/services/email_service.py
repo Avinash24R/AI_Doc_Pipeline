@@ -1,11 +1,15 @@
 import smtplib
-
+import os
 from email.mime.text import MIMEText
 
 from app.core.config import settings
 
 
 def send_email(to_email: str, subject: str, body: str):
+
+    if os.getenv("LOAD_TEST", "false").lower() == "true":
+        print("Skipping email in load test mode")
+        return
 
     msg = MIMEText(body)
 
